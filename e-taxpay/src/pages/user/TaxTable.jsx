@@ -28,8 +28,8 @@ export default function TaxTable() {
                         penalty: record.penalty || 0,
                         total: record.total_amount || (record.amount + (record.penalty || 0)),
                         status: record.status || 'unpaid',
-                        paidDate: record.payment_date ? new Date(record.payment_date).toLocaleDateString('en-IN') : '-',
-                        paidTime: record.payment_date ? new Date(record.payment_date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-',
+                        paidDate: record.paid_date ? new Date(record.paid_date).toLocaleDateString('en-IN') : '-',
+                        paidTime: record.paid_date ? new Date(record.paid_date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '-',
                         dueDate: record.due_date ? new Date(record.due_date).toLocaleDateString('en-IN') : '-'
                     }))
                     setTaxData(mappedData)

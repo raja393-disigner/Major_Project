@@ -18,6 +18,18 @@ export const requireAuth = async (req, res, next) => {
     }
 
     req.user = data.user;
+
+    // SELF-HEALING: Fetch and attach internal database ID (users.id)
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('auth_id', data.user.id)
+      .single();
+
+    if (dbUser) {
+        req.user.db_id = dbUser.id;
+    }
+
     next();
   } catch (err) {
     console.error("AUTH ERROR:", err);

@@ -75,36 +75,31 @@ export const verifyPayment = async (req, res) => {
                     return res.status(404).json({ success: false, message: 'Tax record not found' });
                 }
 
-                // 1. Update the tax record status
+                // 1. Calculate the real penalty paid (past months = ₹50)
+                const CURRENT_MONTH = 3;
+                let appliedPenalty = taxData.penalty || 0;
+                if (taxData.month < CURRENT_MONTH && taxData.year === 2026 && taxData.status !== 'paid') {
+                    appliedPenalty = 50;
+                }
+
+                // 2. Update the tax record status AND penalty
                 const { error: dbError } = await supabase
                     .from('taxes')
                     .update({ 
                         status: 'paid', 
-                        paid_date: new Date().toISOString() // Fixed: changed from payment_date to paid_date
+                        penalty: appliedPenalty,
+                        paid_date: new Date().toISOString() 
                     })
                     .eq('id', taxId);
 
                 if (dbError) {
                     console.error('Database Update Error during payment verification:', dbError);
-                    
-                    if (dbError.code === '42501') {
-                        return res.status(403).json({ 
-                            success: false, 
-                            message: 'Permission denied: Backend cannot update tax record. Please check Supabase RLS policies.',
-                            error: dbError
-                        });
-                    }
-
-                    return res.status(500).json({ 
-                        success: false, 
-                        message: 'Payment verified but failed to update status in database',
-                        error: dbError 
-                    });
+                    return res.status(500).json({ success: false, message: 'Failed to update tax status', error: dbError });
                 }
 
-                // 2. Create a record in the payments table for the receipt/history
+                // 3. Create a record in the payments table with the correct total (550)
                 const receiptNumber = `RCP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-                const totalPaid = Number(taxData.amount) + (Number(taxData.penalty) || 0);
+                const totalPaid = Number(taxData.amount) + appliedPenalty;
 
                 const { error: paymentError } = await supabase
                     .from('payments')
@@ -139,5 +134,42 @@ export const verifyPayment = async (req, res) => {
     } catch (error) {
         console.error('Razorpay Verification Exception:', error);
         res.status(500).json({ success: false, message: 'Internal server error during payment verification', error: error.message });
+    }
+};
+export const getPaymentReceipt = async (req, res) => {
+    try {
+        const { taxId } = req.params;
+
+        // Fetch payment and joined tax data
+        const { data: payment, error } = await supabase
+            .from('payments')
+            .select(`
+                *,
+                tax:taxes (*)
+            `)
+            .eq('tax_id', taxId)
+            .single();
+
+        if (error || !payment) {
+            return res.status(404).json({ success: false, message: 'Receipt not found' });
+        }
+
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        res.status(200).json({
+            success: true,
+            receipt: {
+                receiptNo: payment.receipt_number,
+                transactionId: payment.transaction_id,
+                amount: payment.amount,
+                month: monthNames[payment.tax.month - 1],
+                year: payment.tax.year,
+                paidAt: new Date(payment.paid_at).toLocaleString('en-IN')
+            }
+        });
+
+    } catch (error) {
+        console.error('Get Receipt Error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };

@@ -20,9 +20,8 @@ export default function Payments() {
             setFetching(true)
             const { data } = await api.get('/taxpayers/taxes')
             if (data.success) {
-                // Filter only unpaid taxes for the 'Pending' section
-                const unpaid = data.taxes.filter(t => t.status !== 'paid')
-                setPendingPayments(unpaid)
+                // Show all 12 months as returned by backend
+                setPendingPayments(data.taxes || [])
             }
         } catch (err) {
             console.error("Fetch Taxes Error:", err)
@@ -36,7 +35,13 @@ export default function Payments() {
         fetchTaxes()
     }, [fetchTaxes])
 
-    const totalPending = pendingPayments.reduce((s, p) => s + (Number(p.amount) || 0), 0)
+    // Current month/year based on simulated system date (March 2026)
+    const CURRENT_MONTH = 3;
+    const CURRENT_YEAR = 2026;
+
+    const totalPending = pendingPayments
+        .filter(p => p.status !== 'paid')
+        .reduce((s, p) => s + (Number(p.amount) || 0), 0)
 
     const handlePayment = async (payment) => {
         setProcessing(true)
@@ -116,8 +121,8 @@ export default function Payments() {
         }
     }
 
-    const downloadReceipt = () => {
-        if (!paymentDone) return
+    const downloadReceipt = (data) => {
+        if (!data) return
         const doc = new jsPDF()
 
         // Header
@@ -137,13 +142,13 @@ export default function Payments() {
         doc.setFontSize(10)
         const y = 60
         const fields = [
-            ['Receipt No.', paymentDone.receiptNo],
-            ['Transaction ID', paymentDone.transactionId],
-            ['Name', paymentDone.userName],
-            ['GST ID', paymentDone.gstId],
-            ['Month / Year', `${paymentDone.month} ${paymentDone.year}`],
-            ['Amount Paid', `₹ ${paymentDone.amount}`],
-            ['Payment Date', paymentDone.paidAt],
+            ['Receipt No.', data.receiptNo],
+            ['Transaction ID', data.transactionId],
+            ['Name', user?.username || 'User'],
+            ['GST ID', user?.gstId || 'N/A'],
+            ['Month / Year', `${data.month} ${data.year}`],
+            ['Amount Paid', `₹ ${data.amount}`],
+            ['Payment Date', data.paidAt],
             ['Payment Mode', 'Online (Razorpay)'],
             ['Status', 'PAID ✓'],
         ]
@@ -168,7 +173,25 @@ export default function Payments() {
         doc.text('This is a computer-generated receipt. No signature required.', 14, 270)
         doc.text('© 2026 E-TaxPay | Zila Panchayat, Uttarakhand', 14, 276)
 
-        doc.save(`receipt-${paymentDone.receiptNo}.pdf`)
+        doc.save(`receipt-${data.receiptNo}.pdf`)
+    }
+
+    const handleViewReceipt = async (taxId) => {
+        try {
+            setProcessing(true)
+            const { data } = await api.get(`/payments/receipt/${taxId}`)
+            if (data.success) {
+                // Set paymentDone to show the success/summary card UI
+                setPaymentDone(data.receipt)
+            } else {
+                alert("Receipt details not found.")
+            }
+        } catch (err) {
+            console.error("View Receipt Error:", err)
+            alert("Failed to fetch receipt data.")
+        } finally {
+            setProcessing(false)
+        }
     }
 
     if (paymentDone) {
@@ -202,7 +225,7 @@ export default function Payments() {
                         </div>
 
                         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-                            <button className="btn btn-maroon" style={{ flex: 1 }} onClick={downloadReceipt}>
+                            <button className="btn btn-maroon" style={{ flex: 1 }} onClick={() => downloadReceipt(paymentDone)}>
                                 <FiDownload size={16} /> {t('user.downloadReceipt')}
                             </button>
                             <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setPaymentDone(null)}>
@@ -241,7 +264,7 @@ export default function Payments() {
                     </div>
                     <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                         <span className="aipan-diamond" style={{ margin: 0 }}></span>
-                        Includes {pendingPayments.length} pending billing statements
+                        Includes {pendingPayments.filter(p => p.status !== 'paid').length} pending billing statements
                     </div>
                 </div>
 
@@ -269,7 +292,7 @@ export default function Payments() {
                 </div>
             </div>
 
-            {/* Pending Payments Table */}
+            {/* Billing History Table */}
             <div className="animate-fade-in delay-3">
                 <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '1.25rem' }}>Billing Statement History</h3>
@@ -284,77 +307,56 @@ export default function Payments() {
                         </div>
                     ) : pendingPayments.length === 0 ? (
                         <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            <div style={{ marginBottom: 16 }}>No pending tax records found in your official account.</div>
-                            <button 
-                                className="btn btn-secondary btn-sm" 
-                                onClick={async () => {
-                                    try {
-                                        setProcessing(true)
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-            const dummyTaxes = [
-                { user_id: user.id, amount: 500, status: 'unpaid', month: 1, year: 2026, due_date: '2026-02-15' },
-                { user_id: user.id, amount: 500, status: 'unpaid', month: 2, year: 2026, due_date: '2026-03-15' },
-                { user_id: user.id, amount: 150, status: 'unpaid', month: 3, year: 2026, due_date: '2026-04-15', penalty: 20 }
-            ];
-
-            const { error: seedError } = await supabase
-                .from('taxes')
-                .insert(dummyTaxes);
-            
-            if (seedError) throw seedError;
-
-            alert("Test tax records created! Now you can test 'Pay Now'.")
-            fetchTaxes()
-        } catch (err) {
-            console.error("Seed Error:", err)
-            alert("Failed to seed test data: " + (err.message || "Unknown error"))
-        } finally {
-            setProcessing(false)
-        }
-    }}
-    disabled={processing}
->
-    {processing ? 'Creating...' : '⚙️ Seed Test Data (For Testing)'}
-</button>
-</div>
-) : (
-<table className="data-table">
-<thead>
-    <tr>
-        <th>Transaction Ref</th>
-        <th>Billing Period</th>
-        <th>Current Dues</th>
-        <th>Levy/Penalty</th>
-        <th>Payable Total</th>
-        <th style={{ textAlign: 'right' }}>Action</th>
-    </tr>
-</thead>
-<tbody>
-    {pendingPayments.map(p => {
-        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const displayMonth = typeof p.month === 'number' ? monthNames[p.month - 1] : p.month;
-        
-        return (
-        <tr key={p.id}>
-            <td>
-                <div style={{ fontWeight: 700, color: 'var(--color-maroon)' }}>{p.id.substring(0, 8)}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Generated on {new Date(p.created_at).toLocaleDateString()}</div>
-            </td>
-            <td>
-                <div style={{ fontWeight: 500 }}>{displayMonth} {p.year}</div>
-            </td>
-                                        <td>₹{p.amount}</td>
-                                        <td>
-                                            {p.penalty > 0 ? (
-                                                <span style={{ color: 'var(--color-maroon)', background: 'var(--color-maroon-light)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>
-                                                    + ₹{p.penalty}
-                                                </span>
-                                            ) : (
-                                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Nil</span>
-                                            )}
-                                        </td>
-                                        <td><strong style={{ fontSize: '1rem' }}>₹{Number(p.amount) + (Number(p.penalty) || 0)}</strong></td>
-                                        <td style={{ textAlign: 'right' }}>
+                            <div style={{ marginBottom: 16 }}>No billing history found for this year.</div>
+                        </div>
+                    ) : (
+                        <table className="data-table">
+                        <thead>
+                            <tr>
+                                <th>Transaction Ref</th>
+                                <th>Billing Period</th>
+                                <th>Current Dues</th>
+                                <th>Levy/Penalty</th>
+                                <th>Status</th>
+                                <th style={{ textAlign: 'right' }}>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pendingPayments.map(p => {
+                                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                                const displayMonth = typeof p.month === 'number' ? monthNames[p.month - 1] : p.month;
+                                const isCurrentMonth = p.month === CURRENT_MONTH && p.year === CURRENT_YEAR;
+                                
+                                return (
+                                <tr key={p.id || `v-${p.month}`}>
+                                    <td>
+                                        <div style={{ fontWeight: 700, color: 'var(--color-maroon)' }}>{p.id ? p.id.substring(0, 8) : 'GEN-001'}</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{p.created_at ? `Generated on ${new Date(p.created_at).toLocaleDateString()}` : 'System Generated'}</div>
+                                    </td>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>{displayMonth} {p.year}</div>
+                                    </td>
+                                    <td>₹{p.amount}</td>
+                                    <td>
+                                        {p.penalty > 0 ? (
+                                            <span style={{ color: 'var(--color-maroon)', background: 'var(--color-maroon-light)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                + ₹{p.penalty}
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Nil</span>
+                                        )}
+                                    </td>
+                                    <td>
+                                        {p.status === 'paid' ? (
+                                            <span style={{ color: 'var(--color-green)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <FiCheckCircle size={14} /> Paid
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: '#E8863A', fontWeight: 600 }}>Pending</span>
+                                        )}
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        {p.status !== 'paid' && p.month <= CURRENT_MONTH ? (
                                             <button 
                                                 className="btn btn-green btn-sm" 
                                                 style={{ borderRadius: '8px', padding: '8px 20px', fontWeight: 600 }}
@@ -371,8 +373,15 @@ export default function Payments() {
                                                     </span>
                                                 )}
                                             </button>
-                                        </td>
-                                    </tr>
+                                        ) : p.status === 'paid' ? (
+                                            <button className="btn btn-secondary btn-sm" onClick={() => handleViewReceipt(p.id)} disabled={processing}>
+                                                {processing ? '...' : 'Receipt'}
+                                            </button>
+                                        ) : (
+                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Available {displayMonth}</span>
+                                        )}
+                                    </td>
+                                </tr>
                                 );
                             })}
                         </tbody>

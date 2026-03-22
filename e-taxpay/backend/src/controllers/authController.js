@@ -135,7 +135,7 @@ export const registerUser = async (req, res) => {
           father_name: fatherName,
           gst_id: gstId,
           mobile,
-          district,
+          district: district.trim(),
           block,
           business_type: businessType
         }
