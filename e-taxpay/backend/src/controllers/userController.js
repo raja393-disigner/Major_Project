@@ -64,3 +64,27 @@ export const loginUser = async (req, res) => {
         });
     }
 };
+
+export const getNotices = async (req, res) => {
+  try {
+    const userId = req.user.db_id; // Internal users.id
+
+    if (!userId) {
+      console.error('getNotices internal ID error: User db_id is missing on req.user');
+      return res.status(400).json({ success: false, error: "Internal user ID missing" });
+    }
+
+    const { data: notices, error } = await supabase
+      .from('notices')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.status(200).json({ success: true, notices: notices || [] });
+  } catch (err) {
+    console.error("GET NOTICES ERROR:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};

@@ -60,6 +60,7 @@ export const requireAdmin = async (req, res, next) => {
     // Attach admin details to the request for use in controllers
     req.user.role = roleName;
     req.user.district = admin.district;
+    req.user.admin_db_id = admin.id;
     
     next();
   } catch (err) {

@@ -1,39 +1,29 @@
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FiDownload, FiAlertCircle } from 'react-icons/fi'
 import jsPDF from 'jspdf'
-
-const notices = [
-    {
-        id: 1,
-        title: 'Tax Payment Reminder',
-        message: 'You have not paid tax for January 2026. Please pay within 7 days to avoid additional penalty.',
-        date: '2026-02-15',
-        urgent: true,
-        month: 'January',
-        year: 2026
-    },
-    {
-        id: 2,
-        title: 'Updated Tax Rate Notification',
-        message: 'Please note that the shop tax rate for General Stores has been revised from ₹500 to ₹550 effective April 2026.',
-        date: '2026-02-10',
-        urgent: false,
-        month: '',
-        year: 2026
-    },
-    {
-        id: 3,
-        title: 'Annual Tax Assessment',
-        message: 'Your annual tax assessment for the year 2025 is complete. Please review your records and ensure all dues are cleared.',
-        date: '2026-01-20',
-        urgent: false,
-        month: '',
-        year: 2025
-    },
-]
+import api from '../../lib/api'
 
 export default function Notices() {
     const { t } = useTranslation()
+    const [notices, setNotices] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchNotices = async () => {
+            try {
+                const response = await api.get('/users/notices')
+                if (response.data.success) {
+                    setNotices(response.data.notices || [])
+                }
+            } catch (error) {
+                console.error("Fetch notices error:", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchNotices()
+    }, [])
 
     const downloadNotice = (notice) => {
         const doc = new jsPDF()
@@ -49,7 +39,7 @@ export default function Notices() {
         doc.text(notice.title, 14, 45)
         doc.setFontSize(9)
         doc.setTextColor(100, 100, 100)
-        doc.text(`Date: ${new Date(notice.date).toLocaleDateString('en-IN')}`, 14, 55)
+        doc.text(`Date: ${new Date(notice.created_at).toLocaleDateString('en-IN')}`, 14, 55)
 
         doc.setTextColor(45, 45, 45)
         doc.setFontSize(10)
@@ -77,13 +67,13 @@ export default function Notices() {
                 </div>
             ) : (
                 notices.map(notice => (
-                    <div key={notice.id} className={`notice-card ${notice.urgent ? 'urgent' : ''}`}>
+                    <div key={notice.id} className={`notice-card ${notice.is_urgent ? 'urgent' : ''}`}>
                         <div className="notice-header">
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {notice.urgent && <FiAlertCircle color="var(--color-maroon)" size={18} />}
+                                {notice.is_urgent && <FiAlertCircle color="var(--color-maroon)" size={18} />}
                                 <h4>{notice.title}</h4>
                             </div>
-                            <span className="notice-date">{new Date(notice.date).toLocaleDateString('en-IN')}</span>
+                            <span className="notice-date">{new Date(notice.created_at).toLocaleDateString('en-IN')}</span>
                         </div>
                         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 14, fontSize: '0.9rem' }}>
                             {notice.message}

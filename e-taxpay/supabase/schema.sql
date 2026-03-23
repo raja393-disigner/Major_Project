@@ -135,6 +135,8 @@ CREATE TABLE complaints (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   shop_name VARCHAR(255) NOT NULL,
+  customer_name VARCHAR(255),
+  customer_mobile VARCHAR(15),
   location VARCHAR(255) NOT NULL,
   reason VARCHAR(100) NOT NULL,
   description TEXT NOT NULL,

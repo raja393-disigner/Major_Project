@@ -13,6 +13,7 @@ export default function AllUsers() {
     const [blockFilter, setBlockFilter] = useState('')
     const [statusFilter, setStatusFilter] = useState('')
     const [typeFilter, setTypeFilter] = useState('')
+    const [selectedUser, setSelectedUser] = useState(null)
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -148,7 +149,7 @@ export default function AllUsers() {
                                         <td>{u.date || '-'}</td>
                                         <td>{u.time || '-'}</td>
                                         <td>
-                                            <button className="btn btn-secondary btn-sm">
+                                            <button className="btn btn-secondary btn-sm" onClick={() => setSelectedUser(u)}>
                                                 <FiEye size={14} />
                                             </button>
                                         </td>
@@ -159,6 +160,83 @@ export default function AllUsers() {
                     </tbody>
                 </table>
             </div>
+
+            {/* User Detail Modal */}
+            {selectedUser && (
+                <div className="modal-overlay" onClick={() => setSelectedUser(null)} style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                    <div className="modal-content anim-slide-up" onClick={e => e.stopPropagation()} style={{ maxWidth: 650, backgroundColor: '#fff', borderRadius: 20, overflow: 'hidden', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
+                        {/* Header Banner */}
+                        <div style={{ height: 100, background: 'linear-gradient(135deg, var(--color-maroon), #4d0b17)', position: 'relative' }}>
+                            <button className="btn-close" onClick={() => setSelectedUser(null)} style={{ position: 'absolute', right: 20, top: 15, color: '#fff', fontSize: 24, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', zIndex: 10 }}>&times;</button>
+                        </div>
+
+                        {/* Profile Info Summary */}
+                        <div style={{ padding: '0 30px', marginTop: -50, position: 'relative', marginBottom: 25 }}>
+                            <div className="profile-avatar" style={{ width: 100, height: 100, fontSize: '2.5rem', border: '5px solid #fff', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', margin: '0 0 15px 0' }}>
+                                {(selectedUser.username || selectedUser.name || 'U')[0]}
+                            </div>
+                            <h2 style={{ margin: '5px 0', fontSize: '1.6rem', color: '#333' }}>{selectedUser.username || selectedUser.name}</h2>
+                            <p style={{ margin: 0, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}>
+                                <span className="badge badge-info" style={{ textTransform: 'uppercase' }}>{selectedUser.business_type || selectedUser.type}</span> • Registered Taxpayer
+                            </p>
+                        </div>
+
+                        {/* Details Grid */}
+                        <div style={{ padding: '0 30px 30px 30px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                                {/* Personal Section */}
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Personal Information</h4>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
+                                        <div className="detail-field">
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Father's Name</span>
+                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.father_name || 'N/A'}</strong>
+                                        </div>
+                                        <div className="detail-field">
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Mobile Number</span>
+                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.mobile || 'N/A'}</strong>
+                                        </div>
+                                        <div className="detail-field" style={{ gridColumn: 'span 2' }}>
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Email Address</span>
+                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.email || 'N/A'}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Business Section */}
+                                <div>
+                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Business Context</h4>
+                                    <div className="detail-field" style={{ marginBottom: 12 }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>GST Identification Number (GSTIN)</span>
+                                        <strong style={{ fontSize: '1.05rem', fontFamily: 'monospace', color: '#333' }}>{selectedUser.gst_id || selectedUser.gst}</strong>
+                                    </div>
+                                </div>
+
+                                {/* Location Section */}
+                                <div>
+                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Jurisdiction</h4>
+                                    <div style={{ display: 'flex', gap: 20 }}>
+                                        <div className="detail-field">
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>District</span>
+                                            <strong style={{ fontSize: '0.95rem' }}>{selectedUser.district}</strong>
+                                        </div>
+                                        <div className="detail-field">
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Block</span>
+                                            <strong style={{ fontSize: '0.95rem' }}>{selectedUser.block}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: 35, display: 'flex', justifyContent: 'center' }}>
+                                <button className="btn btn-secondary" onClick={() => setSelectedUser(null)} style={{ padding: '12px 36px', borderRadius: 50, fontWeight: 600 }}>
+                                    Dismiss Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
                 Showing {filtered.length} of {allUsers.length} users

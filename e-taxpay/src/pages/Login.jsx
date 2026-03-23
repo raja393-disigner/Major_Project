@@ -12,6 +12,7 @@ export default function Login() {
     const { login, isLocked } = useAuth()
     const [tab, setTab] = useState('user')
     const [showPassword, setShowPassword] = useState(false)
+    const [showPasskey, setShowPasskey] = useState(false)
     const [captchaVerified, setCaptchaVerified] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -191,36 +192,82 @@ export default function Login() {
                                 <div className="form-group">
                                     <label>{t('auth.password')}</label>
 
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        required
-                                        value={adminForm.password}
-                                        onChange={e =>
-                                            setAdminForm({
-                                                ...adminForm,
-                                                password: e.target.value
-                                            })
-                                        }
-                                    />
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            className="form-control"
+                                            required
+                                            value={adminForm.password}
+                                            onChange={e =>
+                                                setAdminForm({
+                                                    ...adminForm,
+                                                    password: e.target.value
+                                                })
+                                            }
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: 12,
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'var(--text-muted)'
+                                            }}
+                                        >
+                                            {showPassword
+                                                ? <FiEyeOff size={16} />
+                                                : <FiEye size={16} />}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="form-group">
                                     <label>{t('auth.adminPasskey')}</label>
 
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        required
-                                        placeholder="Enter admin passkey"
-                                        value={adminForm.passkey}
-                                        onChange={e =>
-                                            setAdminForm({
-                                                ...adminForm,
-                                                passkey: e.target.value
-                                            })
-                                        }
-                                    />
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPasskey ? 'text' : 'password'}
+                                            className="form-control"
+                                            required
+                                            placeholder="Enter admin passkey"
+                                            value={adminForm.passkey}
+                                            onChange={e =>
+                                                setAdminForm({
+                                                    ...adminForm,
+                                                    passkey: e.target.value
+                                                })
+                                            }
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasskey(!showPasskey)}
+                                            style={{
+                                                position: 'absolute',
+                                                right: 12,
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'none',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: 'var(--text-muted)'
+                                            }}
+                                        >
+                                            {showPasskey
+                                                ? <FiEyeOff size={16} />
+                                                : <FiEye size={16} />}
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}

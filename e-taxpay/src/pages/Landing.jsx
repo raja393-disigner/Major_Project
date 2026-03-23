@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import UttarakhandMap from '../components/UttarakhandMap'
+import api from '../lib/api'
 import {
     FiShield, FiCreditCard, FiActivity, FiMessageCircle,
     FiBell, FiLock, FiSend, FiTrendingUp, FiCheckCircle, FiMapPin,
@@ -17,6 +18,49 @@ export default function Landing() {
     const { t } = useTranslation()
     const { isAuthenticated } = useAuth()
     const [scrolled, setScrolled] = useState(false)
+    const [complaintForm, setComplaintForm] = useState({
+        shopName: '',
+        fullName: '',
+        mobile: '',
+        reason: 'overcharging',
+        description: ''
+    })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitted, setSubmitted] = useState(false)
+
+    const handleComplaintSubmit = async () => {
+        if (!complaintForm.shopName || !complaintForm.fullName || !complaintForm.description) {
+            alert("Please fill in all mandatory fields.")
+            return
+        }
+
+        if (complaintForm.mobile && (complaintForm.mobile.length !== 10 || !/^\d+$/.test(complaintForm.mobile))) {
+            alert("Please enter a valid 10-digit mobile number.")
+            return
+        }
+
+        try {
+            setIsSubmitting(true)
+            const response = await api.post('/complaints', {
+                shop_name: complaintForm.shopName,
+                customer_name: complaintForm.fullName,
+                customer_mobile: complaintForm.mobile,
+                reason: complaintForm.reason,
+                description: complaintForm.description
+            })
+
+            if (response.data.success) {
+                setSubmitted(true)
+                setComplaintForm({ shopName: '', fullName: '', mobile: '', reason: 'overcharging', description: '' })
+                setTimeout(() => setSubmitted(false), 5000)
+            }
+        } catch (error) {
+            console.error("Complaint error:", error)
+            alert("Failed to submit complaint. Please try again.")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -204,30 +248,88 @@ export default function Landing() {
 
                         <div className="complaint-form-side reveal-hidden anim-slide-left">
                             <div className="complaint-card-modern hover-lift">
-                                <div className="complaint-field-group"><label>{t('complaint.shopName')}</label><input type="text" placeholder="e.g., ZP-ALM-102" /></div>
-                                <div className="complaint-field-row">
-                                    <div className="complaint-field-group"><label>{t('help.name')}</label><input type="text" placeholder="Raju" /></div>
-                                    <div className="complaint-field-group"><label>{t('help.mobile')}</label><input type="text" placeholder="+91 XXXX" /></div>
-                                </div>
-                                <div className="complaint-field-group">
-                                    <label>{t('complaint.reason')}</label>
-                                    <select className="complaint-select">
-                                        <option value="overcharging">{t('complaint.reasons.overcharging')}</option>
-                                        <option value="no_receipt">{t('complaint.reasons.noReceipt')}</option>
-                                        <option value="corruption">{t('complaint.reasons.corruption')}</option>
-                                        <option value="other">{t('complaint.reasons.other')}</option>
-                                    </select>
-                                </div>
-                                <div className="complaint-field-group"><label>{t('complaint.description')}</label><textarea rows="3" placeholder="..."></textarea></div>
-                                
-                                <div className="complaint-upload-zone">
-                                    <input type="file" id="evidence-upload" hidden />
-                                    <label htmlFor="evidence-upload" className="upload-trigger-modern hover-glow">
-                                        <FiCamera className="cam-ico" /> <span>{t('complaint.uploadPhoto')}</span>
-                                    </label>
-                                </div>
-                                
-                                <button className="btn-submit-grievance hover-glow">{t('complaint.submit')} <FiChevronRight /></button>
+                                {submitted ? (
+                                    <div className="success-overlay" style={{ textAlign: 'center', padding: '40px 0' }}>
+                                        <div className="interaction-bounce anim-float" style={{ fontSize: '4rem', color: 'var(--color-green)', marginBottom: 20 }}>
+                                            <FiCheckCircle />
+                                        </div>
+                                        <h3 style={{ color: '#821D30', marginBottom: 10 }}>Complaint Filed!</h3>
+                                        <p style={{ color: '#666' }}>Your grievance has been submitted successfully. Our team will review it shortly. Tracking ID: COMP-{Math.floor(Math.random()*9000)+1000}</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="complaint-field-group">
+                                            <label>{t('complaint.shopName')}</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="e.g., ZP-ALM-102" 
+                                                value={complaintForm.shopName}
+                                                onChange={e => setComplaintForm({...complaintForm, shopName: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="complaint-field-row">
+                                            <div className="complaint-field-group">
+                                                <label>{t('help.name')}</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Raju" 
+                                                    value={complaintForm.fullName}
+                                                    onChange={e => setComplaintForm({...complaintForm, fullName: e.target.value})}
+                                                />
+                                            </div>
+                                            <div className="complaint-field-group">
+                                                <label>{t('help.mobile')}</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Enter 10 digit number" 
+                                                    maxLength="10"
+                                                    value={complaintForm.mobile}
+                                                    onChange={e => {
+                                                        const val = e.target.value.replace(/\D/g, '') // Only digits
+                                                        if (val.length <= 10) setComplaintForm({...complaintForm, mobile: val})
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="complaint-field-group">
+                                            <label>{t('complaint.reason')}</label>
+                                            <select 
+                                                className="complaint-select"
+                                                value={complaintForm.reason}
+                                                onChange={e => setComplaintForm({...complaintForm, reason: e.target.value})}
+                                            >
+                                                <option value="overcharging">{t('complaint.reasons.overcharging')}</option>
+                                                <option value="no_receipt">{t('complaint.reasons.noReceipt')}</option>
+                                                <option value="corruption">{t('complaint.reasons.corruption')}</option>
+                                                <option value="other">{t('complaint.reasons.other')}</option>
+                                            </select>
+                                        </div>
+                                        <div className="complaint-field-group">
+                                            <label>{t('complaint.description')}</label>
+                                            <textarea 
+                                                rows="3" 
+                                                placeholder="..." 
+                                                value={complaintForm.description}
+                                                onChange={e => setComplaintForm({...complaintForm, description: e.target.value})}
+                                            />
+                                        </div>
+                                        
+                                        <div className="complaint-upload-zone">
+                                            <input type="file" id="evidence-upload" hidden />
+                                            <label htmlFor="evidence-upload" className="upload-trigger-modern hover-glow">
+                                                <FiCamera className="cam-ico" /> <span>{t('complaint.uploadPhoto')}</span>
+                                            </label>
+                                        </div>
+                                        
+                                        <button 
+                                            className="btn-submit-grievance hover-glow flex items-center justify-center"
+                                            onClick={handleComplaintSubmit}
+                                            disabled={isSubmitting}
+                                        >
+                                            {isSubmitting ? 'Submitting...' : <>{t('complaint.submit')} <FiChevronRight /></>}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>

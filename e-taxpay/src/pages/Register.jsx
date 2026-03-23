@@ -4,16 +4,26 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import Captcha from '../components/Captcha'
-import { FiCamera, FiCheckCircle } from 'react-icons/fi'
+import { FiCheckCircle } from 'react-icons/fi'
 import { supabase } from '../supabaseClient'
 
 const businessTypes = ['general', 'medical', 'clothing', 'electronics', 'restaurant', 'hardware', 'stationery', 'other']
 const districts = ['almora', 'bageshwar', 'chamoli', 'champawat', 'dehradun', 'haridwar', 'nainital', 'pauri', 'pithoragarh', 'rudraprayag', 'tehri', 'udhamsingh', 'uttarkashi']
 
 const blocks = {
-    almora: ['Almora', 'Bhaisiyachana', 'Dwarahat', 'Hawalbagh', 'Lamgara', 'Salt', 'Syaldey', 'Tarikhet'],
+    almora: ['Almora', 'Bhainsiyachhana', 'Bhikiyasain', 'Chaukhutia', 'Dhaula Devi', 'Dwarahat', 'Hawalbagh', 'Lamgara', 'Salt', 'Syalde', 'Takula', 'Tarikhet'],
+    bageshwar: ['Bageshwar', 'Garur', 'Kapkot'],
+    chamoli: ['Dasholi', 'Deval', 'Gairsain', 'Ghat', 'Joshimath', 'Karnaprayag', 'Narayanbagar', 'Pokhari', 'Tharali'],
+    champawat: ['Barakot', 'Champawat', 'Lohaghat', 'Pati'],
     dehradun: ['Chakrata', 'Doiwala', 'Kalsi', 'Raipur', 'Sahaspur', 'Vikasnagar'],
-    nainital: ['Bhimtal', 'Haldwani', 'Kotabagh', 'Okhalkanda', 'Ramgarh'],
+    haridwar: ['Bahadrabad', 'Bhagwanpur', 'Khanpur', 'Laksar', 'Narsan', 'Roorkee'],
+    nainital: ['Betalghat', 'Bhimtal', 'Dhari', 'Haldwani', 'Kotabagh', 'Okhalkanda', 'Ramgarh', 'Ramnagar'],
+    pauri: ['Bironkhal', 'Dugadda', 'Dwarikhal', 'Ekeshwar', 'Jaiharikhal', 'Kaljikhal', 'Khirsu', 'Kot', 'Nainidanda', 'Pabo', 'Pauri', 'Pokhara', 'Rikhanikhal', 'Thalisain', 'Yamkeshwar'],
+    pithoragarh: ['Berinag', 'Dharchula', 'Didihat', 'Gangolihat', 'Kanalichhina', 'Munakot', 'Munsiari', 'Pithoragarh'],
+    rudraprayag: ['Agastmuni', 'Jakholi', 'Ukhimath'],
+    tehri: ['Bhilangna', 'Chamba', 'Devprayag', 'Jakhanidhar', 'Jaunpur', 'Kirtinagar', 'Narendranagar', 'Pratapnagar', 'Thauldhar'],
+    udhamsingh: ['Bajpur', 'Gadarpur', 'Jaspur', 'Kashipur', 'Khatima', 'Rudrapur', 'Sitarganj'],
+    uttarkashi: ['Bhatwari', 'Chinyalisaur', 'Dunda', 'Mori', 'Naugaon', 'Purola'],
 }
 
 export default function Register() {
@@ -209,7 +219,7 @@ const handleSubmit = async (e) => {
                                 <select className="form-control" required value={form.block}
                                     onChange={e => updateForm('block', e.target.value)}>
                                     <option value="">--</option>
-                                    {(blocks[form.district] || ['Block 1', 'Block 2', 'Block 3']).map(b => (
+                                    {(blocks[form.district] || []).map(b => (
                                         <option key={b} value={b}>{b}</option>
                                     ))}
                                 </select>
@@ -225,26 +235,7 @@ const handleSubmit = async (e) => {
                             </select>
                         </div>
 
-                        <div className="auth-form-row">
-                            <div className="form-group">
-                                <label>{t('auth.shopPhoto')}</label>
-                                <div className="file-input-wrapper">
-                                    <div className="file-input-label">
-                                        <FiCamera size={16} /> {t('auth.shopPhoto')}
-                                    </div>
-                                    <input type="file" accept="image/*" />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>{t('auth.userPhoto')}</label>
-                                <div className="file-input-wrapper">
-                                    <div className="file-input-label">
-                                        <FiCamera size={16} /> {t('auth.userPhoto')}
-                                    </div>
-                                    <input type="file" accept="image/*" />
-                                </div>
-                            </div>
-                        </div>
+
 
                         <Captcha onVerify={setCaptchaOk} />
 
