@@ -14,6 +14,9 @@ import complaintRoutes from './routes/complaintRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for real client IP detection (behind nginx/load balancer)
+app.set('trust proxy', true);
+
 // Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
 app.use(express.json());

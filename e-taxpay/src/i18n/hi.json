@@ -209,7 +209,7 @@
         "complaintStatus": "स्थिति",
         "pending": "लंबित",
         "verified": "सत्यापित",
-        "actionTaken": "कार्रवाई की गई",
+        "action_taken": "कार्रवाई की गई",
         "markAs": "चिह्नित करें",
         "timestamp": "समय",
         "action": "कार्रवाई",

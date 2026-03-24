@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllUsers, getMetrics, getDashboardStats, getAnalytics, sendBulkNotice } from '../controllers/adminController.js';
+import { getAllUsers, getMetrics, getDashboardStats, getAnalytics, sendBulkNotice, getAuditLogs } from '../controllers/adminController.js';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -12,5 +12,6 @@ router.get('/metrics', getMetrics);
 router.get('/stats', getDashboardStats);
 router.get('/analytics', getAnalytics);
 router.post('/notices/send-bulk', sendBulkNotice);
+router.get('/audit-logs', getAuditLogs);
 
 export default router;

@@ -1,4 +1,5 @@
 import supabase from '../config/supabase.js';
+import { logAuditAction } from '../utils/auditLogger.js';
 
 export const loginUser = async (req, res) => {
   try {
@@ -82,6 +83,8 @@ export const loginAdmin = async (req, res) => {
     const { data: roleData } = await supabase.from("roles").select("name").eq("id", adminData.role_id).single();
 
     console.log(`[SUCCESS] Admin Logged In: ${username}`);
+    
+    await logAuditAction(adminData.id, null, 'Admin Login', `Admin logged in with username ${username}`, req);
 
     return res.status(200).json({
       success: true,

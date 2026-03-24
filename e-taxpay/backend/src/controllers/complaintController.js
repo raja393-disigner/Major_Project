@@ -1,4 +1,5 @@
 import supabase from '../config/supabase.js';
+import { logAuditAction } from '../utils/auditLogger.js';
 
 export const submitComplaint = async (req, res) => {
     try {
@@ -22,6 +23,8 @@ export const submitComplaint = async (req, res) => {
             console.error('Complaint submission error:', error);
             throw error;
         }
+        
+        await logAuditAction(null, userId, 'Complaint Filed', `New complaint filed regarding ${shop_name} - ${reason}`, req);
 
         res.status(201).json({ success: true, message: 'Complaint submitted successfully' });
     } catch (error) {
@@ -70,6 +73,8 @@ export const updateComplaintStatus = async (req, res) => {
             .eq('id', id);
 
         if (error) throw error;
+
+        await logAuditAction(adminId, null, 'Complaint Updated', `Complaint #${id} status changed to ${status}`, req);
 
         res.status(200).json({ success: true, message: 'Complaint updated successfully' });
     } catch (error) {

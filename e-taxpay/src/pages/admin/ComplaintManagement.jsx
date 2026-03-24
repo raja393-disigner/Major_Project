@@ -132,14 +132,25 @@ export default function ComplaintManagement() {
                             <div style={{ marginTop: 16 }}>
                                 <p style={{ fontSize: '0.85rem', fontWeight: 500, marginBottom: 8 }}>{t('admin.markAs')}</p>
                                 <div style={{ display: 'flex', gap: 8 }}>
-                                    {['pending', 'verified', 'action_taken'].map(s => (
-                                        <button key={s}
-                                            className={`btn btn-sm ${selectedComplaint.status === s ? 'btn-maroon' : 'btn-secondary'}`}
-                                            onClick={() => updateStatus(selectedComplaint.id, s)}>
-                                            {selectedComplaint.status === s && <FiCheck size={14} />}
-                                            {t(`admin.${s}`)}
-                                        </button>
-                                    ))}
+                                    {['pending', 'verified', 'action_taken'].map(s => {
+                                        const isCurrent = selectedComplaint.status === s;
+                                        let isDisabled = false;
+
+                                        if (selectedComplaint.status === 'action_taken' && !isCurrent) isDisabled = true;
+                                        if (selectedComplaint.status === 'verified' && s === 'pending') isDisabled = true;
+
+                                        return (
+                                            <button key={s}
+                                                className={`btn btn-sm ${isCurrent ? 'btn-maroon' : 'btn-secondary'}`}
+                                                onClick={() => !isDisabled && !isCurrent && updateStatus(selectedComplaint.id, s)}
+                                                disabled={isDisabled}
+                                                style={{ opacity: isDisabled ? 0.5 : 1, cursor: isDisabled ? 'not-allowed' : (isCurrent ? 'default' : 'pointer') }}
+                                            >
+                                                {isCurrent && <FiCheck size={14} style={{ marginRight: 4 }} />}
+                                                {t(`admin.${s}`)}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>

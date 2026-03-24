@@ -209,7 +209,7 @@
         "complaintStatus": "Status",
         "pending": "Pending",
         "verified": "Verified",
-        "actionTaken": "Action Taken",
+        "action_taken": "Action Taken",
         "markAs": "Mark As",
         "timestamp": "Timestamp",
         "action": "Action",

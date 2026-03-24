@@ -47,6 +47,7 @@ export const createOrder = async (req, res) => {
 };
 
 import supabase from '../config/supabase.js';
+import { logAuditAction } from '../utils/auditLogger.js';
 
 export const verifyPayment = async (req, res) => {
     try {
@@ -117,6 +118,8 @@ export const verifyPayment = async (req, res) => {
                     console.error('Payment Record Error:', paymentError);
                     // We don't return 500 here because the tax WAS marked as paid, 
                     // but we should log it.
+                } else {
+                    await logAuditAction(null, taxData.user_id, 'Payment Made', `Tax payment of ₹${totalPaid} for month ${taxData.month}/${taxData.year}`, req);
                 }
                 
                 console.log(`Successfully updated tax ${taxId} and created payment record.`);

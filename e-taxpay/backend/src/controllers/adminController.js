@@ -1,4 +1,5 @@
 import supabase from '../config/supabase.js';
+import { logAuditAction } from '../utils/auditLogger.js';
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -384,6 +385,8 @@ export const sendBulkNotice = async (req, res) => {
             // Non-critical, but logging it
         }
 
+        await logAuditAction(adminId, null, 'Notice Generated', `Bulk notice sent to ${userIds.length} users for ${month} ${year}`, req);
+
         res.status(200).json({ 
             success: true, 
             message: `Bulk notices sent successfully to ${userIds.length} users.`,
@@ -425,3 +428,42 @@ async function getLatestPayments(users, isSuperAdmin) {
         return [];
     }
 }
+
+export const getAuditLogs = async (req, res) => {
+    try {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const { data: logs, error } = await supabase
+            .from('audit_logs')
+            .select('*')
+            .gte('created_at', twentyFourHoursAgo)
+            .order('created_at', { ascending: false })
+            .limit(10);
+            
+        if (error) throw error;
+
+        const adminIds = [...new Set(logs.map(l => l.admin_id).filter(Boolean))];
+        const userIds = [...new Set(logs.map(l => l.user_id).filter(Boolean))];
+        
+        let adminMap = {};
+        if (adminIds.length > 0) {
+            const { data: admins } = await supabase.from('admins').select('id, username').in('id', adminIds);
+            admins?.forEach(a => adminMap[a.id] = a.username);
+        }
+        
+        let userMap = {};
+        if (userIds.length > 0) {
+            const { data: users } = await supabase.from('users').select('id, username').in('id', userIds);
+            users?.forEach(u => userMap[u.id] = u.username);
+        }
+        
+        const enrichedLogs = logs.map(l => ({
+            ...l,
+            performedBy: l.admin_id ? (adminMap[l.admin_id] || 'Admin') : (l.user_id ? (userMap[l.user_id] || 'User') : 'System')
+        }));
+        
+        res.status(200).json({ success: true, logs: enrichedLogs });
+    } catch (err) {
+        console.error('getAuditLogs Error:', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+};
