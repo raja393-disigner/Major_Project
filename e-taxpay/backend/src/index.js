@@ -10,6 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
+import govUpdateRoutes from './routes/govUpdateRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +30,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/gov-updates', govUpdateRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

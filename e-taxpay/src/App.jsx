@@ -27,6 +27,7 @@ import NoticeGeneration from './pages/admin/NoticeGeneration'
 import ComplaintManagement from './pages/admin/ComplaintManagement'
 import AuditLogs from './pages/admin/AuditLogs'
 import GovUpdatesAdmin from './pages/admin/GovUpdatesAdmin'
+import AIInsights from './pages/admin/AIInsights'
 
 function AppRoutes() {
     const { isAuthenticated, isAdmin, isUser } = useAuth()
@@ -64,6 +65,7 @@ function AppRoutes() {
                 <Route path="complaints" element={<ComplaintManagement />} />
                 <Route path="audit" element={<AuditLogs />} />
                 <Route path="updates" element={<GovUpdatesAdmin />} />
+                <Route path="ai" element={<AIInsights />} />
             </Route>
 
             {/* Catch-all */}

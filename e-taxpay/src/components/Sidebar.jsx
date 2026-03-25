@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
     FiGrid, FiFileText, FiCreditCard, FiBell, FiGlobe,
-    FiUsers, FiBarChart2, FiEdit, FiMessageSquare, FiList, FiPlusCircle
+    FiUsers, FiBarChart2, FiEdit, FiMessageSquare, FiList, FiPlusCircle, FiCpu
 } from 'react-icons/fi'
 
 const userMenuItems = [
@@ -20,6 +20,7 @@ const adminMenuItems = [
     { key: 'complaints', path: '/admin/complaints', icon: FiMessageSquare, section: 'management' },
     { key: 'auditLogs', path: '/admin/audit', icon: FiList, section: 'system' },
     { key: 'govUpdates', path: '/admin/updates', icon: FiPlusCircle, section: 'system' },
+    { key: 'aiInsights', path: '/admin/ai', icon: FiCpu, section: 'system' },
 ]
 
 export default function Sidebar({ type = 'user', isOpen = true }) {
