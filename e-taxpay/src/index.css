@@ -100,6 +100,38 @@
     transform: none !important;
 }
 
+/* --- Premium Loaders & Pulses --- */
+.loader {
+    width: 60px;
+    height: 60px;
+    border: 5px solid var(--color-maroon-light);
+    border-bottom-color: var(--color-maroon);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pulse {
+    box-shadow: 0 0 0 0 rgba(91, 154, 89, 0.7);
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(91, 154, 89, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(91, 154, 89, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(91, 154, 89, 0); }
+}
+
+.spin {
+    animation: rotation 2s linear infinite;
+}
+
 /* --- Entrance Animation Utilities --- */
 .anim-fade { animation: fadeIn 0.6s ease forwards; }
 .anim-slide-up { animation: slideUpReveal 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }

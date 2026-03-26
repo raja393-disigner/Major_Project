@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FiSearch, FiDownload, FiEye } from 'react-icons/fi'
+import { FiSearch, FiDownload, FiEye, FiUsers, FiCheckCircle, FiActivity, FiMapPin, FiFilter, FiBriefcase, FiRotateCcw, FiTag, FiUser } from 'react-icons/fi'
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import api from '../../lib/api'
@@ -22,13 +22,8 @@ export default function AllUsers() {
                 if (response.data.success) {
                     setAllUsers(response.data.users || []);
                 }
-            } catch (error) {
-                console.error("Failed to fetch users:", error);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error) { console.error("Failed to fetch users:", error); } finally { setLoading(false); }
         };
-
         fetchUsers();
     }, []);
 
@@ -43,203 +38,273 @@ export default function AllUsers() {
     const blocks = [...new Set(allUsers.map(u => u.block).filter(Boolean))]
     const types = [...new Set(allUsers.map(u => u.business_type || u.type).filter(Boolean))]
 
+    const stats = {
+        total: allUsers.length,
+        active: allUsers.filter(u => u.status === 'paid').length,
+        new: allUsers.filter(u => {
+            const date = new Date(u.created_at || u.date);
+            return date.getMonth() === new Date().getMonth();
+        }).length
+    }
+
     const exportPDF = () => {
         const doc = new jsPDF('landscape')
         doc.setFontSize(14)
-        doc.text('E-TaxPay — All Registered Users', 14, 15)
+        doc.text('E-TaxPay — Registered Taxpayers List', 14, 15)
         doc.autoTable({
             startY: 22,
-            head: [['S.No', 'Name', 'GST ID', 'Block', 'Type', 'Month', 'Year', 'Status', 'Date', 'Time']],
-            body: filtered.map((u, i) => [i + 1, u.username || u.name, u.gst_id || u.gst, u.block, u.business_type || u.type, u.month, u.year, (u.status || 'UNPAID').toUpperCase(), u.date, u.time]),
-            theme: 'grid',
-            headStyles: { fillColor: [130, 29, 48] },
-            styles: { fontSize: 7 }
+            head: [['S.No', 'Name', 'GST ID', 'Block', 'Status', 'Date']],
+            body: filtered.map((u, i) => [i + 1, u.username || u.name, u.gst_id || u.gst, u.block, (u.status || 'UNPAID').toUpperCase(), u.date]),
+            theme: 'grid', headStyles: { fillColor: [130, 29, 48] }, styles: { fontSize: 8 }
         })
-        doc.save('all-users.pdf')
+        doc.save('registered-users.pdf')
     }
 
     return (
-        <div>
-            <div className="page-header-actions">
+        <div className="anim-fade">
+            <div className="page-header-actions" style={{ marginBottom: 30 }}>
                 <div className="page-header" style={{ marginBottom: 0 }}>
-                    <h2>{t('admin.allUsers')}</h2>
-                    <p>Complete data of all registered shops</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ padding: 10, background: 'var(--color-maroon)15', color: 'var(--color-maroon)', borderRadius: 12 }}>
+                            <FiUsers size={24} />
+                        </div>
+                        <div>
+                            <h2 style={{ margin: 0 }}>Registered Taxpayers</h2>
+                            <p style={{ margin: 0, color: '#666' }}>Managing {allUsers.length} business profiles across districts</p>
+                        </div>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                    <button className="btn btn-secondary btn-sm" onClick={exportPDF}>
-                        <FiDownload size={14} /> {t('admin.exportPdf')}
+                <button className="btn btn-secondary btn-sm anim-zoom" onClick={exportPDF}>
+                    <FiDownload style={{ marginRight: 6 }} /> Download Directory
+                </button>
+            </div>
+
+            {/* Quick Stats Dashboard */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 30 }}>
+                {[
+                    { label: 'Total Registrations', val: stats.total, icon: <FiUsers />, color: 'var(--color-maroon)' },
+                    { label: 'Verified (Paid)', val: stats.active, icon: <FiCheckCircle />, color: 'var(--color-green)' },
+                    { label: 'New This Month', val: stats.new, icon: <FiActivity />, color: 'var(--color-saffron)' }
+                ].map((s, i) => (
+                    <div key={i} className="card anim-slide-up" style={{ padding: 25, borderRadius: 24, display: 'flex', alignItems: 'center', gap: 20, animationDelay: `${i * 0.1}s` }}>
+                        <div style={{ width: 50, height: 50, borderRadius: 14, background: `${s.color}15`, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {s.icon}
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>{s.val}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#888', fontWeight: 600 }}>{s.label}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Elite Filter Bar */}
+            <div className="card anim-fade" style={{ padding: 20, borderRadius: 24, marginBottom: 30, display: 'flex', flexDirection: 'column', gap: 15 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9rem', color: 'var(--color-maroon)', fontWeight: 700 }}>
+                    <FiFilter /> Smart Filtering Engine
+                </div>
+                <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', flex: '1.5', minWidth: 250 }}>
+                        <FiSearch style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#aaa' }} />
+                        <input type="text" className="form-control" style={{ paddingLeft: 46, height: 48, borderRadius: 14, border: '1px solid #eee' }}
+                            placeholder="Search by Name or GST Identification..." value={search} onChange={e => setSearch(e.target.value)} />
+                    </div>
+                    <select className="form-control" style={{ flex: 1, height: 48, borderRadius: 14 }} value={blockFilter} onChange={e => setBlockFilter(e.target.value)}>
+                        <option value="">Specific Block</option>
+                        {blocks.map(b => <option key={b} value={b}>{String(b).toUpperCase()}</option>)}
+                    </select>
+                    <select className="form-control" style={{ flex: 1, height: 48, borderRadius: 14 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                        <option value="">Payment Status</option>
+                        <option value="paid">✓ Verified (Paid)</option>
+                        <option value="unpaid">✗ Pending (Unpaid)</option>
+                    </select>
+                    <select className="form-control" style={{ flex: 1, height: 48, borderRadius: 14 }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+                        <option value="">Business Type</option>
+                        {types.map(tp => <option key={tp} value={tp}>{String(tp).toUpperCase()}</option>)}
+                    </select>
+                    <button className="btn btn-secondary btn-sm" style={{ padding: '0 20px', borderRadius: 14 }} 
+                        onClick={() => { setSearch(''); setBlockFilter(''); setStatusFilter(''); setTypeFilter('') }}>
+                        <FiRotateCcw />
                     </button>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="filter-bar">
-                <div style={{ position: 'relative', flex: 1, maxWidth: 280 }}>
-                    <FiSearch size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                    <input type="text" className="form-control" style={{ paddingLeft: 36 }}
-                        placeholder={t('common.search')} value={search} onChange={e => setSearch(e.target.value)} />
-                </div>
-                <select className="form-control" value={blockFilter} onChange={e => setBlockFilter(e.target.value)}>
-                    <option value="">All Blocks</option>
-                    {blocks.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-                <select className="form-control" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-                    <option value="">All Status</option>
-                    <option value="paid">{t('user.paid')}</option>
-                    <option value="unpaid">{t('user.unpaid')}</option>
-                </select>
-                <select className="form-control" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-                    <option value="">All Types</option>
-                    {types.map(tp => <option key={tp} value={tp}>{tp}</option>)}
-                </select>
-                <button className="btn btn-secondary btn-sm" onClick={() => { setSearch(''); setBlockFilter(''); setStatusFilter(''); setTypeFilter('') }}>
-                    {t('admin.reset')}
-                </button>
-            </div>
-
-            {/* Table */}
-            <div className="data-table-wrapper">
+            {/* Professional Table */}
+            <div className="data-table-wrapper" style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                 <table className="data-table">
-                    <thead>
+                    <thead style={{ background: '#f8f9fa' }}>
                         <tr>
-                            <th>{t('common.serialNo')}</th>
-                            <th>Name</th>
-                            <th>GST ID</th>
-                            <th>Block</th>
-                            <th>Type</th>
-                            <th>{t('user.month')}</th>
-                            <th>{t('user.status')}</th>
-                            <th>{t('user.date')}</th>
-                            <th>{t('user.time')}</th>
-                            <th>{t('common.actions')}</th>
+                            <th style={{ paddingLeft: 25 }}>Profile</th>
+                            <th>GST Identification</th>
+                            <th>Jurisdiction</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th style={{ textAlign: 'right', paddingRight: 25 }}>Control</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="10" style={{ textAlign: 'center', padding: '2rem' }}>Loading users...</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '100px 0' }}><div className="loader">Analyzing Central Database...</div></td></tr>
                         ) : filtered.length === 0 ? (
-                            <tr><td colSpan="10" style={{ textAlign: 'center', padding: '2rem' }}>No users found</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '100px 0', opacity: 0.5 }}>No records found matching current criteria.</td></tr>
                         ) : (
-                            filtered.map((u, i) => {
-                                const displayName = u.username || u.name || 'Unknown User'
-                                const gstStr = u.gst_id || u.gst || 'N/A'
-                                const typeStr = u.business_type || u.type || 'N/A'
-                                const statusStr = u.status || 'unpaid'
-                                
-                                return (
-                                    <tr key={u.id || i}>
-                                        <td>{i + 1}</td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div className="profile-avatar" style={{ width: 32, height: 32, fontSize: '0.75rem' }}>
-                                                    {displayName.split(' ').map(n => n[0]).join('').substring(0, 2)}
-                                                </div>
-                                                <strong>{displayName}</strong>
+                            filtered.map((u, i) => (
+                                <tr key={u.id || i} className="anim-slide-right" style={{ animationDelay: `${i * 0.05}s` }}>
+                                    <td style={{ paddingLeft: 25 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                                            <div style={{ 
+                                                width: 42, height: 42, background: 'var(--color-maroon)', 
+                                                color: 'white', borderRadius: 12, display: 'flex', 
+                                                alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem'
+                                            }}>
+                                                {(u.username || u.name || 'U')[0].toUpperCase()}
                                             </div>
-                                        </td>
-                                        <td style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}>{gstStr}</td>
-                                        <td>{u.block || 'N/A'}</td>
-                                        <td><span className="badge badge-info">{typeStr}</span></td>
-                                        <td>{u.month || '-'} {u.year || ''}</td>
-                                        <td>
-                                            <span className={`badge badge-${statusStr === 'paid' ? 'paid' : 'danger'}`}>
-                                                {statusStr === 'paid' ? '✓' : '✗'} {statusStr === 'paid' ? t('user.paid') : t('user.unpaid')}
-                                            </span>
-                                        </td>
-                                        <td>{u.date || '-'}</td>
-                                        <td>{u.time || '-'}</td>
-                                        <td>
-                                            <button className="btn btn-secondary btn-sm" onClick={() => setSelectedUser(u)}>
-                                                <FiEye size={14} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                )
-                            })
+                                            <div>
+                                                <div style={{ fontWeight: 800, color: '#333' }}>{u.username || u.name}</div>
+                                                <div style={{ fontSize: '0.7rem', color: '#999', display: 'flex', alignItems: 'center', gap: 4 }}><FiActivity size={10} /> Member since {u.year || '2026'}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style={{ fontFamily: 'monospace', fontWeight: 600, color: '#666' }}>{u.gst_id || u.gst || 'N/A'}</td>
+                                    <td>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{u.block}</div>
+                                        <div style={{ fontSize: '0.7rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: 3 }}><FiMapPin size={10} /> {u.district}</div>
+                                    </td>
+                                    <td><span style={{ fontSize: '0.7rem', fontWeight: 800, padding: '4px 10px', borderRadius: 8, background: '#f0f0f0', color: '#555', textTransform: 'uppercase' }}>{u.business_type || u.type}</span></td>
+                                    <td>
+                                        <div style={{ 
+                                            padding: '6px 14px', borderRadius: 50, fontSize: '0.75rem', fontWeight: 800,
+                                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                                            background: u.status === 'paid' ? '#5B9A5915' : '#821D3015',
+                                            color: u.status === 'paid' ? 'var(--color-green)' : 'var(--color-maroon)'
+                                        }}>
+                                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor' }}></div>
+                                            {u.status === 'paid' ? 'ACTIVE' : 'OVERDUE'}
+                                        </div>
+                                    </td>
+                                    <td style={{ textAlign: 'right', paddingRight: 25 }}>
+                                        <button className="btn btn-secondary btn-sm anim-zoom" style={{ borderRadius: 10, padding: '8px 12px' }} onClick={() => setSelectedUser(u)}>
+                                            <FiEye style={{ marginRight: 6 }} /> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* User Detail Modal */}
+            {/* Profile Experience Modal */}
             {selectedUser && (
-                <div className="modal-overlay" onClick={() => setSelectedUser(null)} style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(0,0,0,0.6)' }}>
-                    <div className="modal-content anim-slide-up" onClick={e => e.stopPropagation()} style={{ maxWidth: 650, backgroundColor: '#fff', borderRadius: 20, overflow: 'hidden', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
-                        {/* Header Banner */}
-                        <div style={{ height: 100, background: 'linear-gradient(135deg, var(--color-maroon), #4d0b17)', position: 'relative' }}>
-                            <button className="btn-close" onClick={() => setSelectedUser(null)} style={{ position: 'absolute', right: 20, top: 15, color: '#fff', fontSize: 24, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', zIndex: 10 }}>&times;</button>
-                        </div>
-
-                        {/* Profile Info Summary */}
-                        <div style={{ padding: '0 30px', marginTop: -50, position: 'relative', marginBottom: 25 }}>
-                            <div className="profile-avatar" style={{ width: 100, height: 100, fontSize: '2.5rem', border: '5px solid #fff', boxShadow: '0 5px 15px rgba(0,0,0,0.1)', margin: '0 0 15px 0' }}>
-                                {(selectedUser.username || selectedUser.name || 'U')[0]}
+                <div className="modal-overlay" onClick={() => setSelectedUser(null)} style={{ backdropFilter: 'blur(8px)', backgroundColor: 'rgba(0,0,0,0.7)' }}>
+                    <div className="modal-content anim-zoom" onClick={e => e.stopPropagation()} style={{ 
+                        maxWidth: 720, borderRadius: 24, overflow: 'hidden', border: 'none', 
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)', background: '#fff', 
+                        maxHeight: '90vh', display: 'flex', flexDirection: 'column'
+                    }}>
+                        {/* Compact Header */}
+                        <div style={{ 
+                            height: 120, background: 'linear-gradient(135deg, var(--color-maroon), #4d0b17)', 
+                            position: 'relative', padding: '20px 30px', display: 'flex', alignItems: 'center', gap: 20
+                        }}>
+                            <button onClick={() => setSelectedUser(null)} style={{ 
+                                position: 'absolute', top: 15, right: 15, background: 'rgba(255,255,255,0.1)', 
+                                border: 'none', color: 'white', borderRadius: '50%', width: 30, height: 30, 
+                                cursor: 'pointer', zIndex: 10
+                            }}>&times;</button>
+                            
+                            <div style={{ 
+                                width: 90, height: 90, borderRadius: 20, background: 'white', border: '4px solid white', 
+                                boxShadow: '0 8px 16px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', 
+                                justifyContent: 'center', fontSize: '2.5rem', fontWeight: 800, color: 'var(--color-maroon)'
+                            }}>
+                                {(selectedUser.username || selectedUser.name || 'U')[0].toUpperCase()}
                             </div>
-                            <h2 style={{ margin: '5px 0', fontSize: '1.6rem', color: '#333' }}>{selectedUser.username || selectedUser.name}</h2>
-                            <p style={{ margin: 0, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}>
-                                <span className="badge badge-info" style={{ textTransform: 'uppercase' }}>{selectedUser.business_type || selectedUser.type}</span> • Registered Taxpayer
-                            </p>
-                        </div>
-
-                        {/* Details Grid */}
-                        <div style={{ padding: '0 30px 30px 30px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                                {/* Personal Section */}
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Personal Information</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
-                                        <div className="detail-field">
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Father's Name</span>
-                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.father_name || 'N/A'}</strong>
-                                        </div>
-                                        <div className="detail-field">
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Mobile Number</span>
-                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.mobile || 'N/A'}</strong>
-                                        </div>
-                                        <div className="detail-field" style={{ gridColumn: 'span 2' }}>
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Email Address</span>
-                                            <strong style={{ fontSize: '1rem' }}>{selectedUser.email || 'N/A'}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Business Section */}
-                                <div>
-                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Business Context</h4>
-                                    <div className="detail-field" style={{ marginBottom: 12 }}>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>GST Identification Number (GSTIN)</span>
-                                        <strong style={{ fontSize: '1.05rem', fontFamily: 'monospace', color: '#333' }}>{selectedUser.gst_id || selectedUser.gst}</strong>
-                                    </div>
-                                </div>
-
-                                {/* Location Section */}
-                                <div>
-                                    <h4 style={{ borderBottom: '1px solid #eee', paddingBottom: 8, marginBottom: 15, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--color-maroon)', letterSpacing: 1 }}>Jurisdiction</h4>
-                                    <div style={{ display: 'flex', gap: 20 }}>
-                                        <div className="detail-field">
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>District</span>
-                                            <strong style={{ fontSize: '0.95rem' }}>{selectedUser.district}</strong>
-                                        </div>
-                                        <div className="detail-field">
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Block</span>
-                                            <strong style={{ fontSize: '0.95rem' }}>{selectedUser.block}</strong>
-                                        </div>
-                                    </div>
+                            
+                            <div style={{ flex: 1 }}>
+                                <h2 style={{ margin: 0, fontSize: '1.8rem', color: 'white' }}>{selectedUser.username || selectedUser.name}</h2>
+                                <div style={{ display: 'flex', gap: 8, marginTop: 5 }}>
+                                    <span style={{ 
+                                        padding: '2px 10px', background: 'rgba(255,255,255,0.15)', color: 'white', 
+                                        borderRadius: 6, fontSize: '0.65rem', fontWeight: 600
+                                    }}>ID: {selectedUser.id?.substring(0, 8)}...</span>
+                                    <span style={{ 
+                                        padding: '2px 10px', background: 'var(--color-saffron)', color: 'white', 
+                                        borderRadius: 6, fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase'
+                                    }}>{selectedUser.business_type || selectedUser.type}</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <div style={{ marginTop: 35, display: 'flex', justifyContent: 'center' }}>
-                                <button className="btn btn-secondary" onClick={() => setSelectedUser(null)} style={{ padding: '12px 36px', borderRadius: 50, fontWeight: 600 }}>
-                                    Dismiss Profile
-                                </button>
+                        {/* Content Area - Scrollable if needed but optimized for one-page */}
+                        <div style={{ padding: '25px 30px', overflowY: 'auto' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 25 }}>
+                                {/* Info Cards */}
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#aaa', textTransform: 'uppercase', marginBottom: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <FiTag /> Professional Data
+                                    </div>
+                                    <div style={{ display: 'grid', gap: 10 }}>
+                                        {[
+                                            { label: 'GST Identification', val: selectedUser.gst_id || selectedUser.gst },
+                                            { label: 'Contact Number', val: `+91 ${selectedUser.mobile || 'N/A'}` },
+                                            { label: "Father's Name", val: selectedUser.father_name || 'N/A' },
+                                            { label: "Email Address", val: selectedUser.email || 'N/A' }
+                                        ].map((item, idx) => (
+                                            <div key={idx} style={{ 
+                                                background: '#f8f9fa', padding: '10px 15px', borderRadius: 12, 
+                                                border: '1px solid #eee'
+                                            }}>
+                                                <div style={{ fontSize: '0.6rem', color: '#999', fontWeight: 700 }}>{item.label}</div>
+                                                <div style={{ fontWeight: 700, color: '#333', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.val}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Status & Assignment */}
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#aaa', textTransform: 'uppercase', marginBottom: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <FiMapPin /> Administrative Assignment
+                                    </div>
+                                    <div style={{ 
+                                        padding: 20, borderRadius: 20, background: 'var(--color-maroon)05', 
+                                        border: '1px solid var(--color-maroon)15', marginBottom: 20
+                                    }}>
+                                        <div style={{ marginBottom: 12 }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--color-maroon)', fontWeight: 700, opacity: 0.5 }}>DISTRICT JURISDICTION</div>
+                                            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{selectedUser.district}</div>
+                                        </div>
+                                        <div style={{ marginBottom: 15 }}>
+                                            <div style={{ fontSize: '0.65rem', color: 'var(--color-maroon)', fontWeight: 700, opacity: 0.5 }}>ASSIGNED BLOCK</div>
+                                            <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{selectedUser.block}</div>
+                                        </div>
+                                        <div style={{ 
+                                            background: '#5B9A5915', color: 'var(--color-green)', 
+                                            padding: '8px 12px', borderRadius: 10, fontSize: '0.7rem', 
+                                            fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8
+                                        }}>
+                                            <FiCheckCircle /> Compliance Verified
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gap: 10 }}>
+                                        <button className="btn btn-primary" style={{ height: 44, borderRadius: 12, fontWeight: 700, fontSize: '0.85rem' }} onClick={() => setSelectedUser(null)}>
+                                            Return to Directory
+                                        </button>
+                                        <button className="btn btn-secondary" style={{ height: 44, borderRadius: 12, fontWeight: 700, fontSize: '0.85rem', background: 'transparent', border: '1px solid #eee', color: '#888' }} onClick={() => setSelectedUser(null)}>
+                                            Update Profile
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div style={{ marginTop: 12, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                Showing {filtered.length} of {allUsers.length} users
+            <div style={{ marginTop: 20, textAlign: 'center', fontSize: '0.85rem', color: '#aaa', fontWeight: 600 }}>
+                Displaying {filtered.length} matching entities • Managed by Zila Panchayat Uttarakhand
             </div>
         </div>
     )

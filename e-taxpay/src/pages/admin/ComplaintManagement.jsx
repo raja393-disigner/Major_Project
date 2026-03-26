@@ -221,20 +221,33 @@ export default function ComplaintManagement() {
                             <div style={{ background: 'var(--bg-secondary)', padding: 25, borderRadius: 20 }}>
                                 <h4 style={{ margin: '0 0 15px 0', fontSize: '0.95rem' }}>Update Case Status</h4>
                                 <div style={{ display: 'flex', gap: 10 }}>
-                                    {['pending', 'verified', 'action_taken'].map(st => (
-                                        <button 
-                                            key={st}
-                                            onClick={() => updateStatus(selectedComplaint.id, st)}
-                                            style={{ 
-                                                flex: 1, padding: '12px 0', borderRadius: 12, border: 'none', fontWeight: 700, cursor: 'pointer',
-                                                background: selectedComplaint.status === st ? 'var(--color-maroon)' : 'white',
-                                                color: selectedComplaint.status === st ? 'white' : '#666',
-                                                boxShadow: selectedComplaint.status === st ? '0 4px 12px rgba(130, 29, 48, 0.2)' : 'none'
-                                            }}
-                                        >
-                                            {st.replace('_', ' ').toUpperCase()}
-                                        </button>
-                                    ))}
+                                    {['pending', 'verified', 'action_taken'].map(st => {
+                                        const currentStatus = selectedComplaint.status;
+                                        const statusOrder = { pending: 0, verified: 1, action_taken: 2 };
+                                        
+                                        // Logic: Disable if button status is behind current status
+                                        const isDisabled = statusOrder[st] < statusOrder[currentStatus];
+                                        const isCurrent = currentStatus === st;
+
+                                        return (
+                                            <button 
+                                                key={st}
+                                                disabled={isDisabled || isCurrent}
+                                                onClick={() => !isDisabled && !isCurrent && updateStatus(selectedComplaint.id, st)}
+                                                style={{ 
+                                                    flex: 1, padding: '12px 0', borderRadius: 12, border: 'none', fontWeight: 700, 
+                                                    cursor: (isDisabled || isCurrent) ? 'not-allowed' : 'pointer',
+                                                    background: isCurrent ? 'var(--color-maroon)' : (isDisabled ? '#eee' : 'white'),
+                                                    color: isCurrent ? 'white' : (isDisabled ? '#ccc' : '#666'),
+                                                    boxShadow: isCurrent ? '0 4px 12px rgba(130, 29, 48, 0.2)' : 'none',
+                                                    opacity: isDisabled ? 0.6 : 1,
+                                                    transition: '0.3s'
+                                                }}
+                                            >
+                                                {st.replace('_', ' ').toUpperCase()}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
