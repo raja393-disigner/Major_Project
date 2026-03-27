@@ -13,6 +13,7 @@ import ForgotPassword from './pages/ForgotPassword'
 
 // User Panel
 import UserLayout from './pages/user/UserLayout'
+import UserDashboard from './pages/user/UserDashboard'
 import TaxTable from './pages/user/TaxTable'
 import Payments from './pages/user/Payments'
 import Notices from './pages/user/Notices'
@@ -46,7 +47,8 @@ function AppRoutes() {
                     <UserLayout />
                 </ProtectedRoute>
             }>
-                <Route index element={<TaxTable />} />
+                <Route index element={<UserDashboard />} />
+                <Route path="records" element={<TaxTable />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="notices" element={<Notices />} />
                 <Route path="updates" element={<GovUpdates />} />

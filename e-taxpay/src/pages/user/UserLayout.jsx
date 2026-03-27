@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
+import Chatbot from '../../components/Chatbot'
 
 export default function UserLayout() {
     const { t } = useTranslation()
@@ -17,6 +18,7 @@ export default function UserLayout() {
                     <Outlet />
                 </main>
             </div>
+            <Chatbot />
         </div>
     )
 }

@@ -6,7 +6,8 @@ import {
 } from 'react-icons/fi'
 
 const userMenuItems = [
-    { key: 'taxTable', path: '/user', icon: FiFileText },
+    { key: 'dashboard', path: '/user', icon: FiGrid },
+    { key: 'taxTable', path: '/user/records', icon: FiFileText },
     { key: 'payments', path: '/user/payments', icon: FiCreditCard },
     { key: 'notices', path: '/user/notices', icon: FiBell },
     { key: 'govUpdates', path: '/user/updates', icon: FiGlobe },
