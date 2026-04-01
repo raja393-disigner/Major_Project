@@ -41,8 +41,8 @@ export const getAllUsers = async (req, res) => {
     }
 
     // Process each user to determine a summary status
-    const CURRENT_MONTH = 3;
-    const CURRENT_YEAR = 2026;
+    const CURRENT_MONTH = new Date().getMonth() + 1;
+    const CURRENT_YEAR = new Date().getFullYear();
 
     const processedUsers = users.map(user => {
       const userTaxes = allTaxes?.filter(t => t.user_id === user.id || t.user_id === user.auth_id) || [];
@@ -89,8 +89,8 @@ export const getMetrics = async (req, res) => {
     const { count: totalUsers } = await userQuery;
 
     // 2. Fetch Taxes to determine shop statuses
-    const CURRENT_MONTH = 3;
-    const CURRENT_YEAR = 2026;
+    const CURRENT_MONTH = new Date().getMonth() + 1;
+    const CURRENT_YEAR = new Date().getFullYear();
 
     let taxQuery = supabase.from('taxes').select('user_id, status, month, year');
     if (!isSuperAdmin) {
@@ -184,7 +184,7 @@ export const getDashboardStats = async (req, res) => {
             .from('taxes')
             .select('*')
             .in('user_id', userIds)
-            .eq('year', 2026);
+            .eq('year', new Date().getFullYear());
         
         if (taxError) throw taxError;
 
@@ -227,7 +227,8 @@ export const getDashboardStats = async (req, res) => {
 
         // Ensure current month exists in monthly data for chart
         const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const finalMonthlyData = monthOrder.slice(0, 4).map(m => monthlyStats[m] || { month: m, amount: 0 });
+        const currentMonthIdx = new Date().getMonth();
+        const finalMonthlyData = monthOrder.slice(0, currentMonthIdx + 1).map(m => monthlyStats[m] || { month: m, amount: 0 });
 
         res.status(200).json({
             success: true,
@@ -250,7 +251,7 @@ export const getAnalytics = async (req, res) => {
     try {
         const isSuperAdmin = req.user.role === 'super_admin';
         const district = req.user.district;
-        const CURRENT_YEAR = 2026;
+        const CURRENT_YEAR = new Date().getFullYear();
 
         // 1. Fetch Users in district
         let userQuery = supabase.from('users').select('id, district, block, business_type');

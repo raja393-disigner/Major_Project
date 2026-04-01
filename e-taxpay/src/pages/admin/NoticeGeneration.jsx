@@ -43,6 +43,16 @@ export default function NoticeGeneration() {
     const [preview, setPreview] = useState(null)
     const [sent, setSent] = useState(false)
 
+    const getAdminName = (dist) => {
+        const admins = {
+            'ALMORA': 'Raja',
+            'DEHRADUN': 'Rahul',
+            'HARIDWAR': 'Amit',
+            'NAINITAL': 'Priya'
+        };
+        return admins[dist] || 'Raja';
+    };
+
     const isSuperAdmin = user?.role === 'super_admin'
 
     useEffect(() => {
@@ -224,53 +234,97 @@ export default function NoticeGeneration() {
                             </div>
 
                             <div className="card anim-zoom" style={{ 
-                                padding: '60px 50px', 
-                                borderRadius: 8, 
+                                padding: '40px 50px', 
+                                borderRadius: 4, 
                                 background: 'white', 
-                                boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                                minHeight: 650,
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                                 position: 'relative',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                textAlign: 'left',
+                                border: '1px solid #ddd',
+                                margin: '0 auto',
+                                maxWidth: '100%'
                             }}>
                                 {/* Header */}
-                                <div style={{ textAlign: 'center', borderBottom: '2px double #333', paddingBottom: 20, marginBottom: 40 }}>
-                                    <div style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--color-maroon)', letterSpacing: 1 }}>ZILA PANCHAYAT OFFICE, {preview.district.toUpperCase()}</div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#666' }}>Government of Uttarakhand | Directorate of Panchayati Raj</div>
-                                    <div style={{ position: 'absolute', top: 40, right: 50, fontSize: '0.8rem', color: '#333' }}><b>DATE:</b> {new Date().toLocaleDateString('en-GB')}</div>
+                                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                                        <div style={{ fontWeight: 900, fontSize: '1.6rem', color: 'var(--color-maroon)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Zila Panchayat Office, {preview.district.toUpperCase()}</div>
+                                        <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#555', marginTop: 4 }}>Government of Uttarakhand | Directorate of Panchayati Raj</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ borderBottom: '2px solid var(--color-maroon)', marginBottom: 2 }}></div>
+                                <div style={{ borderBottom: '1px solid var(--color-maroon)', marginBottom: 20 }}></div>
+
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 600, marginBottom: 30, color: '#333' }}>
+                                    <div><b>Ref No:</b> ETAX/{new Date().getFullYear()}/PREVIEW</div>
+                                    <div><b>Date:</b> {new Date().toLocaleDateString('en-GB')}</div>
                                 </div>
 
                                 {/* Body */}
-                                <div style={{ fontSize: '1rem', color: '#333', lineHeight: 1.8, fontFamily: 'serif' }}>
-                                    <div style={{ fontWeight: 800, marginBottom: 30, textDecoration: 'underline' }}>{preview.text.split('\n\n')[0]}</div>
-                                    <p style={{ marginBottom: 20 }}>Dear Taxpayer/Shop Owner,</p>
-                                    <p style={{ textIndent: 40 }}>{preview.text.split('\n\n')[1]}</p>
-                                    <p style={{ marginTop: 20 }}>This communication serves as an official notice under the Uttarakhand Panchayati Raj Act. Please comply to maintain legal business operations.</p>
+                                <div style={{ fontSize: '1rem', color: '#222', lineHeight: 1.6, fontFamily: '"Times New Roman", Times, serif', position: 'relative', zIndex: 1 }}>
+                                    <div style={{ fontWeight: 800, marginBottom: 25, textDecoration: 'underline', fontSize: '1.05rem' }}>{preview.text.split('\n\n')[0]}</div>
+                                    <p style={{ marginBottom: 15, fontWeight: 600 }}>Dear Taxpayer/Shop Owner,</p>
+                                    <p style={{ textIndent: 30, textAlign: 'justify', marginBottom: 15 }}>{preview.text.split('\n\n')[1]}</p>
+                                    <p style={{ textAlign: 'justify', fontWeight: 600 }}>This communication serves as an official notice under the Uttarakhand Panchayati Raj Act. Please comply to maintain legal business operations and avoid penal actions.</p>
                                 </div>
 
                                 {/* Seal & Signature Visual */}
-                                <div style={{ marginTop: 60, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                                <div style={{ marginTop: 50, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingBottom: 20, position: 'relative', zIndex: 1 }}>
                                     <div style={{ 
-                                        width: 100, height: 100, 
-                                        borderRadius: '50%', 
-                                        border: '4px double rgba(130, 29, 48, 0.2)', 
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '0.6rem', color: 'rgba(130, 29, 48, 0.4)', textAlign: 'center',
-                                        fontWeight: 800, textTransform: 'uppercase'
+                                        width: 110, height: 110, 
+                                        opacity: 0.85, 
+                                        transform: 'rotate(-10deg)',
+                                        flexShrink: 0,
+                                        mixBlendMode: 'multiply'
                                     }}>
-                                        Zila Panchayat<br/>Official Seal<br/>{preview.district}
+                                        <svg viewBox="0 0 100 100" width="110" height="110">
+                                            <circle cx="50" cy="50" r="48" fill="none" stroke="#a32020" strokeWidth="1.2" strokeDasharray="3 1"/>
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#a32020" strokeWidth="2.5" />
+                                            <circle cx="50" cy="50" r="28" fill="none" stroke="#a32020" strokeWidth="1.5" />
+                                            <circle cx="50" cy="50" r="26" fill="none" stroke="#a32020" strokeWidth="0.8" />
+                                            
+                                            <path id="topCurve-gen" d="M 16 50 A 34 34 0 0 1 84 50" fill="none" />
+                                            <text fill="#a32020" fontSize="10" fontWeight="900" letterSpacing="1">
+                                                <textPath href="#topCurve-gen" startOffset="50%" textAnchor="middle">ZILA PANCHAYAT</textPath>
+                                            </text>
+                                            
+                                            <path id="botCurve-gen" d="M 16 50 A 34 34 0 0 0 84 50" fill="none" />
+                                            <text fill="#a32020" fontSize="8" fontWeight="bold" letterSpacing="2">
+                                                <textPath href="#botCurve-gen" startOffset="50%" textAnchor="middle">UTTARAKHAND</textPath>
+                                            </text>
+                                            
+                                            <text x="14" y="53" fill="#a32020" fontSize="10" textAnchor="middle">★</text>
+                                            <text x="86" y="53" fill="#a32020" fontSize="10" textAnchor="middle">★</text>
+                                            
+                                            <text x="50" y="44" fill="#a32020" fontSize="6" fontWeight="bold" textAnchor="middle" letterSpacing="1">OFFICIAL</text>
+                                            <text x="50" y="52" fill="#a32020" fontSize="6" fontWeight="bold" textAnchor="middle" letterSpacing="1">SEAL</text>
+                                            <text x="50" y="62" fill="#a32020" fontSize="8" fontWeight="900" textAnchor="middle">{preview.district.toUpperCase()}</text>
+                                        </svg>
                                     </div>
-                                    <div style={{ textAlign: 'center', borderTop: '1px solid #333', paddingTop: 10, width: 220 }}>
-                                        <div style={{ fontSize: '0.9rem', fontWeight: 800 }}>Additional Chief Officer</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#666' }}>Zila Panchayat Administration</div>
+                                    <div style={{ textAlign: 'center', width: 220, flexShrink: 0 }}>
+                                        <div style={{ 
+                                            fontFamily: '"Brush Script MT", "Caveat", "Great Vibes", cursive', 
+                                            fontSize: '2rem', 
+                                            color: '#1a365d', 
+                                            transform: 'rotate(-5deg)',
+                                            marginBottom: -5,
+                                            marginTop: 10
+                                        }}>{getAdminName(preview.district.toUpperCase())}</div>
+                                        <div style={{ borderTop: '1px solid #333', paddingTop: 8, marginTop: 5 }}>
+                                            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#222' }}>Additional Chief Officer</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#555' }}>Zila Panchayat Administration</div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Background Watermark */}
                                 <div style={{ 
                                     position: 'absolute', top: '50%', left: '50%', 
-                                    transform: 'translate(-50%, -50%) rotate(-30deg)', 
-                                    fontSize: '8rem', color: 'rgba(0,0,0,0.02)', 
-                                    fontWeight: 900, pointerEvents: 'none', whiteSpace: 'nowrap'
+                                    transform: 'translate(-50%, -50%) rotate(-45deg)', 
+                                    fontSize: '6rem', color: 'rgba(130, 29, 48, 0.04)', 
+                                    fontWeight: 900, pointerEvents: 'none', whiteSpace: 'nowrap',
+                                    zIndex: 0, letterSpacing: 10
                                 }}>
                                     {preview.district.toUpperCase()}
                                 </div>

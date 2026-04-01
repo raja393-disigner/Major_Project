@@ -44,7 +44,7 @@ export const getTaxpayerProfile = async (req, res) => {
 export const getTaxpayerTaxes = async (req, res) => {
   try {
     const userId = req.user?.db_id || req.user?.id; // Prefer internal ID
-    const currentYear = 2026; // Fix for current project context
+    const currentYear = new Date().getFullYear(); // Dynamic based on system clock
 
     // API Key business rates
     const businessTypeToAmount = {
@@ -77,11 +77,11 @@ export const getTaxpayerTaxes = async (req, res) => {
 
     if (error) throw error;
 
-    const CURRENT_MONTH = 3;
+    const CURRENT_MONTH = new Date().getMonth() + 1; // 1-indexed (1=Jan, 12=Dec)
 
     // 2. SELF-HEALING: If we don't have all 12 months, we should ensure they exist
     if (!taxes || taxes.length < 12) {
-        console.log(`Seeding missing tax records for year 2026, User: ${userId}, Type: ${shopType}, Rate: ${monthlyRate}`);
+        console.log(`Seeding missing tax records for year ${currentYear}, User: ${userId}, Type: ${shopType}, Rate: ${monthlyRate}`);
         const currentMonths = taxes?.map(t => t.month) || [];
         const missingMonths = Array.from({ length: 12 }, (_, i) => i + 1)
             .filter(m => !currentMonths.includes(m));

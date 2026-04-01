@@ -35,9 +35,9 @@ export default function Payments() {
         fetchTaxes()
     }, [fetchTaxes])
 
-    // Current month/year based on simulated system date (March 2026)
-    const CURRENT_MONTH = 3;
-    const CURRENT_YEAR = 2026;
+    // Current month/year based on real-time system date
+    const CURRENT_MONTH = new Date().getMonth() + 1; // 1-indexed (1=Jan, 12=Dec)
+    const CURRENT_YEAR = new Date().getFullYear();
 
     const totalPending = pendingPayments
         .filter(p => p.status !== 'paid')

@@ -77,9 +77,10 @@ export const verifyPayment = async (req, res) => {
                 }
 
                 // 1. Calculate the real penalty paid (past months = ₹50)
-                const CURRENT_MONTH = 3;
+                const CURRENT_MONTH = new Date().getMonth() + 1; // 1-indexed (1=Jan, 12=Dec)
+                const currentYear = new Date().getFullYear();
                 let appliedPenalty = taxData.penalty || 0;
-                if (taxData.month < CURRENT_MONTH && taxData.year === 2026 && taxData.status !== 'paid') {
+                if (taxData.month < CURRENT_MONTH && taxData.year === currentYear && taxData.status !== 'paid') {
                     appliedPenalty = 50;
                 }
 

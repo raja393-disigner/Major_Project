@@ -18,9 +18,9 @@ export default function TaxTable() {
 
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     
-    // Current month/year for payment availability logic
-    const CURRENT_MONTH = 3;
-    const CURRENT_YEAR = 2026;
+    // Current month/year based on real-time system date
+    const CURRENT_MONTH = new Date().getMonth() + 1; // 1-indexed (1=Jan, 12=Dec)
+    const CURRENT_YEAR = new Date().getFullYear();
 
     const fetchTaxes = useCallback(async () => {
         try {
