@@ -69,7 +69,7 @@ e-taxpay/
 
 ## 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/raju/Major-Project.git
+git clone https://github.com/raja393-disigner/Major-Project.git
 
 ---
 ## 2️⃣ Setup Frontend
