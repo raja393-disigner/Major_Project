@@ -53,7 +53,8 @@
 
 ## 📂 Project Structure
 e-taxpay/
-├── frontend/          # React + Vite application
+
+├── frontend/   # React + Vite application
 │   ├── src/assets/    # Images & Brand Identity (Uttarakhand Emblem)
 │   ├── src/components/# Reusable UI Components
 │   └── public/        # Static assets (Favicons)
