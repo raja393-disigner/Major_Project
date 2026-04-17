@@ -60,7 +60,7 @@ e-taxpay/
 ├── backend/           # Node.js Server
 │   ├── src/controllers/# Business Logic
 │   └── src/routes/     # API Endpoints
-└── supabase/          # Database Schemas & SQL migrations 
+└── supabase/          # Database Schemas & SQL migrations
 
 
 ---
