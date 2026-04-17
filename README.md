@@ -65,20 +65,23 @@ e-taxpay/
 
 ---
 
- ##🔧 Installation & Setup
+## 🔧 Installation & Setup 
 
 ## 1️⃣ Clone the Repository
+```
 ```bash
 git clone https://github.com/raja393-disigner/Major-Project.git
 
 ---
 ## 2️⃣ Setup Frontend
+```
 ```bash
 cd frontend
 npm install
 npm run dev
 
 ## 3️⃣ Setup Backend
+```
 ```bash
 cd ../backend
 npm install
