@@ -52,7 +52,7 @@
 ---
 
 ## 📂 Project Structure
-
+```bash
 e-taxpay/
 ├── frontend/   # React + Vite application
 │   ├── src/assets/    # Images & Brand Identity (Uttarakhand Emblem)
@@ -63,7 +63,6 @@ e-taxpay/
 │   └── src/routes/     # API Endpoints
 └── supabase/          # Database Schemas & SQL migrations
 
-```bash
 ---
 
  ##🔧 Installation & Setup
