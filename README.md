@@ -64,11 +64,11 @@ e-taxpay/
 └── supabase/          # Database Schemas & SQL migrations
 
 ---
+```
+##  🔧 Installation & Setup 
 
-## 🔧 Installation & Setup 
 
 ## 1️⃣ Clone the Repository
-```
 ```bash
 git clone https://github.com/raja393-disigner/Major-Project.git
 
