@@ -52,6 +52,7 @@
 ---
 
 ## 📂 Project Structure
+```bash
 e-taxpay/
 ├── frontend/   # React + Vite application
 │   ├── src/assets/    # Images & Brand Identity (Uttarakhand Emblem)
@@ -70,7 +71,7 @@ e-taxpay/
 ```bash
 git clone https://github.com/raju/Major-Project.git
 
-
+---
 ## 2️⃣ Setup Frontend
 ```bash
 cd frontend
