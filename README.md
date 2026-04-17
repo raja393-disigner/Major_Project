@@ -65,19 +65,19 @@ e-taxpay/
 
 
 ---
- 🔧 Installation & Setup
+ ##🔧 Installation & Setup
 
-1️⃣ Clone the Repository
+### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/raju/Major-Project.git
 
 
-2️⃣ Setup Frontend
+### 2️⃣ Setup Frontend
 cd frontend
 npm install
 npm run dev
 
- 3️⃣ Setup Backend
+### 3️⃣ Setup Backend
 cd ../backend
 npm install
 
