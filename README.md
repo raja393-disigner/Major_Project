@@ -72,11 +72,13 @@ git clone https://github.com/raju/Major-Project.git
 
 
 ## 2️⃣ Setup Frontend
+```bash
 cd frontend
 npm install
 npm run dev
 
 ## 3️⃣ Setup Backend
+```bash
 cd ../backend
 npm install
 
