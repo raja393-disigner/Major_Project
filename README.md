@@ -53,16 +53,14 @@
 
 ## 📂 Project Structure
 e-taxpay/
-├── frontend/ # React + Vite Frontend
-│ ├── src/assets/ # Images, Logos, Emblems
-│ ├── src/components/ # UI Components
-│ └── public/ # Static Files (Favicons)
-│
-├── backend/ # Node.js Backend
-│ ├── src/controllers/ # Business Logic
-│ └── src/routes/ # REST API Endpoints
-│
-└── supabase/ # Database Schema & SQL Migrations  
+├── frontend/          # React + Vite application
+│   ├── src/assets/    # Images & Brand Identity (Uttarakhand Emblem)
+│   ├── src/components/# Reusable UI Components
+│   └── public/        # Static assets (Favicons)
+├── backend/           # Node.js Server
+│   ├── src/controllers/# Business Logic
+│   └── src/routes/     # API Endpoints
+└── supabase/          # Database Schemas & SQL migrations 
 
 
 ---
